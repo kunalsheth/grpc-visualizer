@@ -6,6 +6,6 @@ CLI to visually inspect gRPC's `.proto` config files.
 take a look at the [`samples`](https://github.com/kunalsheth/grpc-visualizer/blob/master/samples/) folder for testing input data.
 
 `./run.sh` test output:
-![Pretty CLI Demo](https://github.com/kunalsheth/grpc-visualizer/blob/master/samples/output.png)
+![Pretty CLI Demo](https://raw.githubusercontent.com/kunalsheth/grpc-visualizer/master/samples/output.png)
 
 `samples/` taken from the [gRPC java example repo](github.com/grpc/grpc-java/tree/master/examples/src/main/proto)
