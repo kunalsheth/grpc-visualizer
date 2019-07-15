@@ -26,4 +26,4 @@ message My
 
 
 Trim video. Then convert to compressed gif
-ffmpeg -i video.mov -filter:v "setpts=0.75*PTS" -r 5 -vf scale=878:600 demo3.gif
+ffmpeg -i video.mov -filter:v "setpts=0.75*PTS" -r 5 -vf scale=878:600 demo.gif
