@@ -1,0 +1,29 @@
+modify your PATH to contain grpc-visualizer (build/distributions/grpc-visualizer-0.0.1/bin)
+
+cd samples/
+ls
+
+grpc-visualizer route_guide.proto
+help
+
+service
+
+message Note
+message Summary
+message Database
+
+grpc-visualizer route_guide.proto "service Potato"
+
+grpc-visualizer route_guide.proto "service Guide"
+
+grpc-visualizer special_cases.proto "messsage Book"
+
+grpc-visualizer special_cases.proto
+
+service My
+message My
+
+
+
+Trim video. Then convert to compressed gif
+ffmpeg -i video.mov -filter:v "setpts=0.75*PTS" -r 5 -vf scale=878:600 demo3.gif

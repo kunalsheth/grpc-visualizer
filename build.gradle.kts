@@ -13,6 +13,7 @@ repositories {
 dependencies {
     testCompile("junit", "junit", "4.12")
     implementation("com.google.protobuf", "protobuf-java", "3.8.0")
+    implementation("org.fusesource.jansi", "jansi", "1.18")
 }
 
 configure<JavaPluginConvention> {
