@@ -2,6 +2,7 @@ package info.kunalsheth.grpcvisualizer.cli;
 
 import com.google.protobuf.DescriptorProtos.DescriptorProto;
 import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
+import info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor;
 import org.fusesource.jansi.Ansi;
 
 import java.util.HashSet;
@@ -9,15 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static info.kunalsheth.grpcvisualizer.cli.AnsiFieldDescriptor.messageLine;
-import static info.kunalsheth.grpcvisualizer.cli.AnsiFieldDescriptor.simpleTypeName;
-import static info.kunalsheth.grpcvisualizer.cli.AnsiInstantiator.ansi;
+import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor.messageLine;
+import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor.simpleTypeName;
+import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiInstantiator.ansi;
 import static org.fusesource.jansi.Ansi.Attribute.INTENSITY_FAINT;
 
 public final class MessageCLI {
 
-    static final Ansi.Color FG_CUSTOM_TYPE = Ansi.Color.CYAN;
-    static final Ansi.Color FG_PRIMITIVE_TYPE = Ansi.Color.BLUE;
+    public static final Ansi.Color FG_CUSTOM_TYPE = Ansi.Color.CYAN;
+    public static final Ansi.Color FG_PRIMITIVE_TYPE = Ansi.Color.BLUE;
 
     private static String faint(String txt) {
         return ansi().a(INTENSITY_FAINT).a(txt).reset().toString();

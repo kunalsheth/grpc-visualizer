@@ -1,24 +1,24 @@
-package info.kunalsheth.grpcvisualizer.cli;
+package info.kunalsheth.grpcvisualizer.prettyprint;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
-final class Padding {
+public final class Padding {
 
-    static String spaces(int num) {
+    public static String spaces(int num) {
         char[] arr = new char[num];
         Arrays.fill(arr, ' ');
         return new String(arr);
     }
 
-    static Queue<Character> toCharQueue(String text) {
+    public static Queue<Character> toCharQueue(String text) {
         LinkedList<Character> q = new LinkedList<>();
         for (char c : text.toCharArray()) q.add(c);
         return q;
     }
 
-    static String pad(String plainText, String prettyText, int spacing) {
+    public static String pad(String plainText, String prettyText, int spacing) {
         if (plainText.length() > spacing)
             throw new IllegalArgumentException("Text cannot be centered within a space smaller than it.");
         if (plainText.contains("\n"))

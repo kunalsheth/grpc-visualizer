@@ -96,6 +96,10 @@ public final class GrpcVisualizer {
         return FileDescriptorSet.parseFrom(new FileInputStream(fdsFile));
     }
 
+    private static void renderDigraph(String head) {
+
+    }
+
     private static void printServices(String match) {
         fds.getFileList().stream()
                 .map(FileDescriptorProto::getServiceList)

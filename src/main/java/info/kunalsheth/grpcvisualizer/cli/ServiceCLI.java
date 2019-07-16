@@ -2,6 +2,8 @@ package info.kunalsheth.grpcvisualizer.cli;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.DescriptorProtos.MethodDescriptorProto;
+import info.kunalsheth.grpcvisualizer.prettyprint.AnsiMethodDescriptor;
+import info.kunalsheth.grpcvisualizer.prettyprint.Padding;
 import org.fusesource.jansi.Ansi;
 
 import java.util.List;
@@ -10,15 +12,14 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static info.kunalsheth.grpcvisualizer.cli.AnsiInstantiator.ansi;
-import static info.kunalsheth.grpcvisualizer.cli.AnsiInstantiator.noAnsi;
+import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiInstantiator.ansi;
+import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiInstantiator.noAnsi;
 import static org.fusesource.jansi.Ansi.Attribute.INTENSITY_FAINT;
-import static org.fusesource.jansi.Ansi.Attribute.RESET;
 
 public final class ServiceCLI {
 
-    static final Ansi.Color FG_CLIENT = Ansi.Color.GREEN;
-    static final Ansi.Color FG_SERVER = Ansi.Color.MAGENTA;
+    public static final Ansi.Color FG_CLIENT = Ansi.Color.GREEN;
+    public static final Ansi.Color FG_SERVER = Ansi.Color.MAGENTA;
 
     public static void print(DescriptorProtos.ServiceDescriptorProto service) {
         System.out.println(ansi()

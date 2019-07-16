@@ -1,4 +1,4 @@
-package info.kunalsheth.grpcvisualizer.cli;
+package info.kunalsheth.grpcvisualizer.prettyprint;
 
 import com.google.protobuf.DescriptorProtos;
 import org.fusesource.jansi.Ansi;
@@ -9,21 +9,24 @@ import static info.kunalsheth.grpcvisualizer.cli.MessageCLI.FG_PRIMITIVE_TYPE;
 import static org.fusesource.jansi.Ansi.Attribute.INTENSITY_FAINT;
 import static org.fusesource.jansi.Ansi.Attribute.ITALIC;
 
-final class AnsiFieldDescriptor {
+public final class AnsiFieldDescriptor {
 
-    static String messageLine(Ansi a, DescriptorProtos.DescriptorProto m) {
+    public static String messageLine(Ansi a, DescriptorProtos.DescriptorProto m) {
         return a
                 .a(INTENSITY_FAINT).a("message ").reset()
                 .fg(FG_CUSTOM_TYPE).bold().a(m.getName()).reset()
                 .toString();
     }
 
-    static String simpleTypeName(DescriptorProtos.FieldDescriptorProto m) {
-        String t = m.getTypeName();
-        return t.substring(t.lastIndexOf('.') + 1);
+    public static String simpleTypeName(DescriptorProtos.FieldDescriptorProto m) {
+        return simpleTypeName(m.getTypeName());
     }
 
-    static String fieldLine(Ansi a, DescriptorProtos.FieldDescriptorProto m, boolean isPrimitive) {
+    public static String simpleTypeName(String name) {
+        return name.substring(name.lastIndexOf('.') + 1);
+    }
+
+    public static String fieldLine(Ansi a, DescriptorProtos.FieldDescriptorProto m, boolean isPrimitive) {
 
         // type name string manipulation is brittle and hackish. not sure if a better way exists though :(
         String typeName = m.getTypeName().isEmpty() ? m
