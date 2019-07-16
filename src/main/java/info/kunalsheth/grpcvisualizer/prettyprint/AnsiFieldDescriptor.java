@@ -19,7 +19,17 @@ public final class AnsiFieldDescriptor {
     }
 
     public static String simpleTypeName(DescriptorProtos.FieldDescriptorProto m) {
-        return simpleTypeName(m.getTypeName());
+        // type name string manipulation is brittle and hackish. not sure if a better way exists though :(
+        return m.getTypeName().isEmpty() ? m
+                .getType()
+                .toString()
+                .replaceFirst("TYPE_", "")
+                .toLowerCase()
+                : simpleTypeName(m.getTypeName());
+    }
+
+    public static String typeSuffix(DescriptorProtos.FieldDescriptorProto m) {
+        return m.getLabel() == LABEL_REPEATED ? "[]" : "";
     }
 
     public static String simpleTypeName(String name) {
@@ -27,21 +37,12 @@ public final class AnsiFieldDescriptor {
     }
 
     public static String fieldLine(Ansi a, DescriptorProtos.FieldDescriptorProto m, boolean isPrimitive) {
-
-        // type name string manipulation is brittle and hackish. not sure if a better way exists though :(
-        String typeName = m.getTypeName().isEmpty() ? m
-                .getType()
-                .toString()
-                .replaceFirst("TYPE_", "")
-                .toLowerCase()
-                : simpleTypeName(m);
-
         if (isPrimitive) a = a.fg(FG_PRIMITIVE_TYPE);
         else a = a.fg(FG_CUSTOM_TYPE).bold();
 
         return a
-                .a(typeName)
-                .a(m.getLabel() == LABEL_REPEATED ? "[]" : "")
+                .a(simpleTypeName(m))
+                .a(typeSuffix(m))
                 .reset().a(' ')
 
                 .a(ITALIC).a(m.getName())

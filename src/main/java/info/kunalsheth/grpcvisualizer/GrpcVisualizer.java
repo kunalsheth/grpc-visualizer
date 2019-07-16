@@ -3,6 +3,7 @@ package info.kunalsheth.grpcvisualizer;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
+import info.kunalsheth.grpcvisualizer.cli.Digraph;
 import info.kunalsheth.grpcvisualizer.cli.MessageCLI;
 import info.kunalsheth.grpcvisualizer.cli.ServiceCLI;
 
@@ -10,10 +11,12 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
+import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor.simpleTypeName;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public final class GrpcVisualizer {
@@ -22,8 +25,10 @@ public final class GrpcVisualizer {
             "commands: \n" +
             "\t'help'\n" +
             "\t'message [REGEX]' — display structure of message data\n" +
+            "\t'digraph (svg|pdf|png|dot)' — display structure of message types in relation to each other\n" +
             "\t'service [REGEX]' — display client/server RPC functions";
     private static final String messageCmd = "message(.*)";
+    private static final String digraphCmd = "digraph (svg|pdf|png|dot)";
     private static final String serviceCmd = "service(.*)";
 
     private static final String hello = "Welcome to grpc-visualizer. For help, type 'help'.";
@@ -59,6 +64,9 @@ public final class GrpcVisualizer {
                         String regex = ".*" + cmd.replaceAll(messageCmd, "$1").trim() + ".*";
                         if (!isValidRegex(regex)) System.err.println("Invalid regex: " + regex);
                         else printMessages(regex);
+                    } else if (cmd.matches(digraphCmd)) {
+                        String dotOrSvg = cmd.replaceAll(digraphCmd, "$1");
+                        renderDigraph(dotOrSvg);
                     } else if (cmd.matches(serviceCmd)) {
                         String regex = ".*" + cmd.replaceAll(serviceCmd, "$1").trim() + ".*";
                         if (!isValidRegex(regex)) System.err.println("Invalid regex: " + regex);
@@ -96,8 +104,26 @@ public final class GrpcVisualizer {
         return FileDescriptorSet.parseFrom(new FileInputStream(fdsFile));
     }
 
-    private static void renderDigraph(String head) {
+    private static void printMessages(String match) {
+        Map<String, DescriptorProtos.DescriptorProto> messages = allMessages();
 
+        messages.entrySet().stream()
+                .filter(e -> e.getKey().matches(match))
+                .map(Map.Entry::getValue)
+                .forEach(m -> {
+                    MessageCLI.print(messages, m);
+                    System.out.println();
+                });
+    }
+
+    private static void renderDigraph(String format) {
+        Map<String, DescriptorProtos.DescriptorProto> messages = allMessages();
+        try {
+            Digraph.render(messages, format);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println();
     }
 
     private static void printServices(String match) {
@@ -111,44 +137,36 @@ public final class GrpcVisualizer {
                 });
     }
 
-    private static void printMessages(String match) {
-        Map<String, DescriptorProtos.DescriptorProto> messageTypes = fds
+    private static Map<String, DescriptorProtos.DescriptorProto> allMessages() {
+        Set<DescriptorProtos.DescriptorProto> messages = fds
                 .getFileList()
                 .stream()
                 .map(FileDescriptorProto::getMessageTypeList)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toMap(
-                        DescriptorProtos.DescriptorProto::getName,
-                        identity -> identity
-                ));
+                .collect(Collectors.toSet());
 
         while (true) { // don't really care about efficiency...
-            Map<String, DescriptorProtos.DescriptorProto> nestedTypes = messageTypes.values().stream()
+            Set<DescriptorProtos.DescriptorProto> nestedMessages = messages.stream()
                     .map(DescriptorProtos.DescriptorProto::getNestedTypeList)
                     .flatMap(Collection::stream)
-                    .collect(Collectors.toMap(
-                            DescriptorProtos.DescriptorProto::getName,
-                            identity -> identity
-                    ));
+                    .collect(Collectors.toSet());
 
-            int originalSize = messageTypes.size();
-            messageTypes.putAll(nestedTypes);
-            if (messageTypes.size() == originalSize) break;
+            int originalSize = messages.size();
+            messages.addAll(nestedMessages);
+            if (messages.size() == originalSize) break;
         }
 
-        messageTypes.values().stream()
-                .filter(m -> m.getName().matches(match))
-                .forEach(m -> {
-                    MessageCLI.print(messageTypes, m);
-                    System.out.println();
-                });
+        return messages.stream().collect(Collectors.toMap(
+                i -> simpleTypeName(i.getName()),
+                identity -> identity
+        ));
     }
 
     private static void usgErrCrash() {
         errCrash(usage, 1);
     }
 
-    private static void errCrash(String msg, int code) {
+    public static void errCrash(String msg, int code) {
         System.err.println(msg);
         System.exit(code);
     }
