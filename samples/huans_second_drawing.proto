@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+message A {
+    B aHasB = 1;
+}
+message B {
+    C bHasC = 1;
+    D andD = 2;
+    E andE = 3;
+}
+message C {
+    D cAlsoHasD = 1;
+}
+message D {
+    A dMischievouslyHasA = 1;
+}
+message E {
+}

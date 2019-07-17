@@ -1,6 +1,7 @@
 package info.kunalsheth.grpcvisualizer;
 
 import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.DescriptorProtos.DescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
 import info.kunalsheth.grpcvisualizer.cli.Digraph;
@@ -105,7 +106,7 @@ public final class GrpcVisualizer {
     }
 
     private static void printMessages(String match) {
-        Map<String, DescriptorProtos.DescriptorProto> messages = allMessages();
+        Map<String, DescriptorProto> messages = allMessages();
 
         messages.entrySet().stream()
                 .filter(e -> e.getKey().matches(match))
@@ -117,7 +118,7 @@ public final class GrpcVisualizer {
     }
 
     private static void renderDigraph(String format) {
-        Map<String, DescriptorProtos.DescriptorProto> messages = allMessages();
+        Map<String, DescriptorProto> messages = allMessages();
         try {
             Digraph.render(messages, format);
         } catch (IOException | InterruptedException e) {
@@ -137,8 +138,8 @@ public final class GrpcVisualizer {
                 });
     }
 
-    private static Map<String, DescriptorProtos.DescriptorProto> allMessages() {
-        Set<DescriptorProtos.DescriptorProto> messages = fds
+    private static Map<String, DescriptorProto> allMessages() {
+        Set<DescriptorProto> messages = fds
                 .getFileList()
                 .stream()
                 .map(FileDescriptorProto::getMessageTypeList)
@@ -146,8 +147,8 @@ public final class GrpcVisualizer {
                 .collect(Collectors.toSet());
 
         while (true) { // don't really care about efficiency...
-            Set<DescriptorProtos.DescriptorProto> nestedMessages = messages.stream()
-                    .map(DescriptorProtos.DescriptorProto::getNestedTypeList)
+            Set<DescriptorProto> nestedMessages = messages.stream()
+                    .map(DescriptorProto::getNestedTypeList)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet());
 

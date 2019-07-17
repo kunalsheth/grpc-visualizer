@@ -37,21 +37,23 @@ public final class MessageCLI {
             Map<String, DescriptorProto> messages,
             DescriptorProto msg
     ) {
-        System.out.println(
-                messageLine(ansi(), msg)
-        );
+//        System.out.println(
+//                messageLine(ansi(), msg)
+//        );
+//
+//        Set<DescriptorProto> visited = new HashSet<>();
+//        visited.add(msg);
+//
+//        List<FieldDescriptorProto> children = msg.getFieldList();
+//
+//        for (int i = 0; i < children.size(); i++)
+//            print(
+//                    messages, visited,
+//                    children.get(i), " ",
+//                    i == children.size() - 1
+//            );
 
-        Set<DescriptorProto> visited = new HashSet<>();
-        visited.add(msg);
 
-        List<FieldDescriptorProto> children = msg.getFieldList();
-
-        for (int i = 0; i < children.size(); i++)
-            print(
-                    messages, visited,
-                    children.get(i), " ",
-                    i == children.size() - 1
-            );
     }
 
     private static void print(

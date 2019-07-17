@@ -1,6 +1,7 @@
 package info.kunalsheth.grpcvisualizer.prettyprint;
 
 import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.DescriptorProtos.DescriptorProto;
 import org.fusesource.jansi.Ansi;
 
 import static com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
@@ -11,7 +12,7 @@ import static org.fusesource.jansi.Ansi.Attribute.ITALIC;
 
 public final class AnsiFieldDescriptor {
 
-    public static String messageLine(Ansi a, DescriptorProtos.DescriptorProto m) {
+    public static String messageLine(Ansi a, DescriptorProto m) {
         return a
                 .a(INTENSITY_FAINT).a("message ").reset()
                 .fg(FG_CUSTOM_TYPE).bold().a(m.getName()).reset()

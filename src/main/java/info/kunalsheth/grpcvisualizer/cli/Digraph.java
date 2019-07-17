@@ -1,6 +1,7 @@
 package info.kunalsheth.grpcvisualizer.cli;
 
 import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.DescriptorProtos.DescriptorProto;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor.typ
 public class Digraph {
 
     public static void render(
-            Map<String, DescriptorProtos.DescriptorProto> messages, String format
+            Map<String, DescriptorProto> messages, String format
     ) throws IOException, InterruptedException {
         File dotSource = File.createTempFile(
                 "GrpcVisualizer", ".dot"
