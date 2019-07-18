@@ -4,9 +4,9 @@ CLI to visually inspect gRPC's `.proto` config files.
 ![Demo GIF](./demo/demo.gif)
 (`>>>` indicates a streaming RPC call, `──>` indicates a singular value.)
 
-## Direction Graphs
+## Directional Graphs
 
-### Example 1
+### Example
 Input:
 ```proto
 message RecursiveType {
@@ -28,14 +28,12 @@ message AddressBook {
     repeated Person people = 1;
 }
 ```
-Command: `digraph svg`
-Output:
-
+Command: `digraph svg`  
+Output:  
 ![Demo Digraph](./demo/digraph.svg)
 
-
 ## Cyclic Dependency Detection
-Input:
+Input:  
 ```proto
 message A {
     B aHasB = 1;
@@ -51,7 +49,6 @@ message D {
     A dMischievouslyHasA = 1;
 }
 ```
-Command: `digraph svg A`
-Output:
-
+Command: `digraph svg A`  
+Output:  
 ![Demo Cyclic Dependency Detection](./demo/huans_first_drawing_AFTER.svg)
