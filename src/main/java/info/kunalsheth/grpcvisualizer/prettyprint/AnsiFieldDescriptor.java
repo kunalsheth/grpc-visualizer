@@ -2,6 +2,7 @@ package info.kunalsheth.grpcvisualizer.prettyprint;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.DescriptorProtos.DescriptorProto;
+import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
 import org.fusesource.jansi.Ansi;
 
 import static com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
@@ -19,7 +20,7 @@ public final class AnsiFieldDescriptor {
                 .toString();
     }
 
-    public static String simpleTypeName(DescriptorProtos.FieldDescriptorProto m) {
+    public static String simpleTypeName(FieldDescriptorProto m) {
         // type name string manipulation is brittle and hackish. not sure if a better way exists though :(
         return m.getTypeName().isEmpty() ? m
                 .getType()
@@ -29,7 +30,11 @@ public final class AnsiFieldDescriptor {
                 : simpleTypeName(m.getTypeName());
     }
 
-    public static String typeSuffix(DescriptorProtos.FieldDescriptorProto m) {
+    public static String simpleTypeName(DescriptorProtos.DescriptorProto m) {
+        return simpleTypeName(m.getName());
+    }
+
+    public static String typeSuffix(FieldDescriptorProto m) {
         return m.getLabel() == LABEL_REPEATED ? "[]" : "";
     }
 
@@ -37,7 +42,7 @@ public final class AnsiFieldDescriptor {
         return name.substring(name.lastIndexOf('.') + 1);
     }
 
-    public static String fieldLine(Ansi a, DescriptorProtos.FieldDescriptorProto m, boolean isPrimitive) {
+    public static String fieldLine(Ansi a, FieldDescriptorProto m, boolean isPrimitive) {
         if (isPrimitive) a = a.fg(FG_PRIMITIVE_TYPE);
         else a = a.fg(FG_CUSTOM_TYPE).bold();
 

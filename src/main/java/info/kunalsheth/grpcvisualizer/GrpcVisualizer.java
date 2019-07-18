@@ -1,6 +1,5 @@
 package info.kunalsheth.grpcvisualizer;
 
-import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.DescriptorProtos.DescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
@@ -26,10 +25,10 @@ public final class GrpcVisualizer {
             "commands: \n" +
             "\t'help'\n" +
             "\t'message [REGEX]' — display structure of message data\n" +
-            "\t'digraph (svg|pdf|png|dot)' — display structure of message types in relation to each other\n" +
+            "\t'digraph (svg|pdf|png|dot) (REGEX)' — display structure of message types in relation to each other\n" +
             "\t'service [REGEX]' — display client/server RPC functions";
     private static final String messageCmd = "message(.*)";
-    private static final String digraphCmd = "digraph (svg|pdf|png|dot)";
+    private static final String digraphCmd = "digraph\\s+(svg|pdf|png|dot)(.*)";
     private static final String serviceCmd = "service(.*)";
 
     private static final String hello = "Welcome to grpc-visualizer. For help, type 'help'.";
@@ -66,8 +65,10 @@ public final class GrpcVisualizer {
                         if (!isValidRegex(regex)) System.err.println("Invalid regex: " + regex);
                         else printMessages(regex);
                     } else if (cmd.matches(digraphCmd)) {
-                        String dotOrSvg = cmd.replaceAll(digraphCmd, "$1");
-                        renderDigraph(dotOrSvg);
+                        String format = cmd.replaceAll(digraphCmd, "$1");
+                        String regex = ".*" + cmd.replaceAll(digraphCmd, "$2").trim() + ".*";
+                        if (!isValidRegex(regex)) System.err.println("Invalid regex: " + regex);
+                        renderDigraph(format, regex);
                     } else if (cmd.matches(serviceCmd)) {
                         String regex = ".*" + cmd.replaceAll(serviceCmd, "$1").trim() + ".*";
                         if (!isValidRegex(regex)) System.err.println("Invalid regex: " + regex);
@@ -117,10 +118,25 @@ public final class GrpcVisualizer {
                 });
     }
 
-    private static void renderDigraph(String format) {
+    private static void renderDigraph(String format, String match) {
         Map<String, DescriptorProto> messages = allMessages();
+
+        DescriptorProto parent = null;
+
+        Set<DescriptorProto> matchedMessages = messages.entrySet().stream()
+                .filter(e -> e.getKey().matches(match))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toSet());
+        int matches = matchedMessages.size();
+
+        if (matches == 1) parent = matchedMessages.iterator().next();
+        else if (matches > 1)
+            System.err.println("Regex matched more than one message. Generating generic digraph.");
+        else
+            System.err.println("Regex doesn't match any messages. Generating generic digraph.");
+
         try {
-            Digraph.render(messages, format);
+            Digraph.render(messages, parent, format);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -158,7 +174,7 @@ public final class GrpcVisualizer {
         }
 
         return messages.stream().collect(Collectors.toMap(
-                i -> simpleTypeName(i.getName()),
+                i -> simpleTypeName(i),
                 identity -> identity
         ));
     }

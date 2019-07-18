@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor.messageLine;
 import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor.simpleTypeName;
@@ -37,23 +36,21 @@ public final class MessageCLI {
             Map<String, DescriptorProto> messages,
             DescriptorProto msg
     ) {
-//        System.out.println(
-//                messageLine(ansi(), msg)
-//        );
-//
-//        Set<DescriptorProto> visited = new HashSet<>();
-//        visited.add(msg);
-//
-//        List<FieldDescriptorProto> children = msg.getFieldList();
-//
-//        for (int i = 0; i < children.size(); i++)
-//            print(
-//                    messages, visited,
-//                    children.get(i), " ",
-//                    i == children.size() - 1
-//            );
+        System.out.println(
+                messageLine(ansi(), msg)
+        );
 
+        Set<DescriptorProto> visited = new HashSet<>();
+        visited.add(msg);
 
+        List<FieldDescriptorProto> children = msg.getFieldList();
+
+        for (int i = 0; i < children.size(); i++)
+            print(
+                    messages, visited,
+                    children.get(i), " ",
+                    i == children.size() - 1
+            );
     }
 
     private static void print(
