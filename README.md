@@ -4,10 +4,8 @@ CLI to visually inspect gRPC's `.proto` config files.
 ![Demo GIF](./demo/demo.gif)
 (`>>>` indicates a streaming RPC call, `──>` indicates a singular value.)
 
-## Directional Graphs
-
-### Example
-Input:
+## Directional Graphs  
+Input:  
 ```proto
 message RecursiveType {
     // ...
