@@ -4,8 +4,10 @@ CLI to visually inspect gRPC's `.proto` config files.
 ![Demo GIF](./demo/demo.gif)
 (`>>>` indicates a streaming RPC call, `──>` indicates a singular value.)
 
-grpc-visualizer can also generate directed graphs representing the structure of message data types.
-For example:
+## Direction Graphs
+
+### Example 1
+Input:
 ```proto
 message RecursiveType {
     // ...
@@ -26,12 +28,30 @@ message AddressBook {
     repeated Person people = 1;
 }
 ```
-
-gets transformed into:
+Command: `digraph svg`
+Output:
 
 ![Demo Digraph](./demo/digraph.svg)
 
 
+## Cyclic Dependency Detection
+Input:
+```proto
+message A {
+    B aHasB = 1;
+    C aAlsoHasC = 2;
+}
+message B {
+    D bHasD = 1;
+}
+message C {
+    D cHasD = 1;
+}
+message D {
+    A dMischievouslyHasA = 1;
+}
+```
+Command: `digraph svg A`
+Output:
 
-take a look at the [`samples`](https://github.com/kunalsheth/grpc-visualizer/blob/master/samples/) folder for testing input data.
-`samples/` taken from the [gRPC java example repo](github.com/grpc/grpc-java/tree/master/examples/src/main/proto)
+![Demo Cyclic Dependency Detection](./demo/huans_first_drawing_AFTER.svg)

@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
@@ -25,31 +24,23 @@ public class Digraph {
     public static void render(
             Map<String, DescriptorProto> messages, DescriptorProto parent, String format
     ) throws IOException, InterruptedException {
-        LinkedList<String> lines = new LinkedList<>();
-        BiConsumer<String, DescriptorProto> writeNode = (String containerName, DescriptorProto containerNode) ->
-                lines.add(containerName + " [" +
-                        "shape=box " +
-                        "fontname=Helvetica " +
-                        "fontcolor=cyan4 " +
-                        "style=rounded " +
-                        "tooltip=\"" + tooltip(containerNode) + "\" " +
-                        "]; ");
+        LinkedList<String> dotSource = new LinkedList<>();
 
         if (parent == null) messages.forEach((containerName, containerNode) -> {
-            writeNode.accept(containerName, containerNode);
+            dotSource.add(printNode(containerName, containerNode));
 
             containerNode.getFieldList().stream()
                     .filter(f -> messages.containsKey(simpleTypeName(f)))
-                    .map(f -> arrowPrint(containerName, f, false))
-                    .forEach(lines::add);
+                    .map(f -> printEdge(containerName, f, false))
+                    .forEach(dotSource::add);
         });
         else {
             Set<ProtoGraph.EdgeData> edges = dfIter(messages, parent);
 
             edges.forEach(e -> {
                 String containerName = simpleTypeName(e.from);
-                lines.add(
-                        arrowPrint(containerName, e.to, e.isBackEdge)
+                dotSource.add(
+                        printEdge(containerName, e.to, e.isBackEdge)
                 );
             });
 
@@ -59,21 +50,25 @@ public class Digraph {
                             messages.get(simpleTypeName(e.to))
                     ))
                     .distinct()
-                    .forEach(node -> writeNode.accept(simpleTypeName(node), node));
+                    .forEach(node -> dotSource.add(
+                            printNode(simpleTypeName(node), node)
+                    ));
+
+
         }
 
 
-        File dotSource = File.createTempFile(
+        File dotFile = File.createTempFile(
                 "GrpcVisualizer", ".dot"
         );
-        PrintWriter dot = new PrintWriter(dotSource);
-        dot.println("digraph {");
-        dot.println("rankdir=\"LR\";");
-        lines.stream()
+        PrintWriter pw = new PrintWriter(dotFile);
+        pw.println("digraph {");
+        pw.println("rankdir=\"LR\";");
+        dotSource.stream()
                 .sorted()
-                .forEach(dot::println);
-        dot.println("}");
-        dot.close();
+                .forEach(pw::println);
+        pw.println("}");
+        pw.close();
 
 
         Process p = new ProcessBuilder("dot", "-?").start();
@@ -81,7 +76,7 @@ public class Digraph {
         if (p.exitValue() != 0) errCrash("graphviz dot doesn't seem to be installed", 4);
 
         File output = new File("digraph." + format);
-        p = new ProcessBuilder("dot", "-T" + format, dotSource.getAbsolutePath())
+        p = new ProcessBuilder("dot", "-T" + format, dotFile.getAbsolutePath())
                 .inheritIO()
                 .redirectOutput(output)
                 .start();
@@ -91,7 +86,7 @@ public class Digraph {
         System.out.println("Open " + output.getCanonicalPath() + " to view digraph.");
     }
 
-    private static String arrowPrint(String container, FieldDescriptorProto f, boolean highlight) {
+    private static String printEdge(String container, FieldDescriptorProto f, boolean isBackEdge) {
         boolean isRepeated = f.getLabel() == LABEL_REPEATED;
         String label = f.getName() + typeSuffix(f);
 
@@ -101,10 +96,21 @@ public class Digraph {
                 "fontcolor=gray25 " +
                 "label=\"" + label + "\" " +
                 "style=" + (isRepeated ? "dashed" : "solid") + " " +
-                "color=" + (highlight ? "red" : "gray") + " " +
+                "color=" + (isBackEdge ? "red" : "gray") + " " +
+                "constraint=" + !isBackEdge + " " +
                 " ];";
 
         return container + " -> " + simpleTypeName(f) + attrs;
+    }
+
+    private static String printNode(String containerName, DescriptorProto containerNode) {
+        return containerName + " [" +
+                "shape=box " +
+                "fontname=Helvetica " +
+                "fontcolor=cyan4 " +
+                "style=rounded " +
+                "tooltip=\"" + tooltip(containerNode) + "\" " +
+                "]; ";
     }
 
     private static String tooltip(DescriptorProto containerNode) {
