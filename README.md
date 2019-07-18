@@ -72,7 +72,19 @@ message D {
 message E {
 }
 ```
+Command: `digraph svg`  
+Output:  
+![Demo Cyclic Dependency Detection](./demo/huans_second_drawing_BEFORE.svg)
+
 Command: `digraph svg A`  
 Output:  
 ![Demo Cyclic Dependency Detection](./demo/huans_second_drawing_AFTER.svg)
+
+Command: `digraph svg C`  
+Output:  
+![Demo Cyclic Dependency Detection](./demo/huans_second_drawing_AFTER_C.svg)
+
+Command: `digraph svg D`  
+Output:  
+![Demo Cyclic Dependency Detection](./demo/huans_second_drawing_AFTER_D.svg)
 
