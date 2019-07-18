@@ -30,7 +30,8 @@ Command: `digraph svg`
 Output:  
 ![Demo Digraph](./demo/digraph.svg)
 
-## Cyclic Dependency Detection
+## Cyclic Dependency Detection  
+### Example 1
 Input:  
 ```proto
 message A {
@@ -50,3 +51,28 @@ message D {
 Command: `digraph svg A`  
 Output:  
 ![Demo Cyclic Dependency Detection](./demo/huans_first_drawing_AFTER.svg)
+
+### Example 2
+Input:  
+```proto
+message A {
+    B aHasB = 1;
+}
+message B {
+    C bHasC = 1;
+    D andD = 2;
+    E andE = 3;
+}
+message C {
+    D cAlsoHasD = 1;
+}
+message D {
+    A dMischievouslyHasA = 1;
+}
+message E {
+}
+```
+Command: `digraph svg A`  
+Output:  
+![Demo Cyclic Dependency Detection](./demo/huans_second_drawing_AFTER.svg)
+
