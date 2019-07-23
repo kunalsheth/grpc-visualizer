@@ -4,8 +4,10 @@ import com.google.protobuf.DescriptorProtos.DescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
 import info.kunalsheth.grpcvisualizer.cli.Digraph;
+import info.kunalsheth.grpcvisualizer.cli.DigraphServer;
 import info.kunalsheth.grpcvisualizer.cli.MessageCLI;
 import info.kunalsheth.grpcvisualizer.cli.ServiceCLI;
+import info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor;
 
 import java.io.*;
 import java.util.Arrays;
@@ -16,30 +18,34 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
-import static info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor.simpleTypeName;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public final class GrpcVisualizer {
 
-    private static final String usage = "grpc-visualizer path/to/grpc-config.proto [commands]\n\n" +
+    private static final String usage = "grpc-visualizer path/to/grpc-config.proto [\"command 1\" \"command 2\"...]\n" +
+            "\n" +
             "commands: \n" +
             "\t'help'\n" +
+            "\t'gui'\n" +
             "\t'message [REGEX]' — display structure of message data\n" +
-            "\t'digraph (svg|pdf|png|dot) (REGEX)' — display structure of message types in relation to each other\n" +
+            "\t'digraph (svg|pdf|png|dot) [REGEX]' — display structure of message types in relation to each other\n" +
             "\t'service [REGEX]' — display client/server RPC functions";
     private static final String messageCmd = "message(.*)";
     private static final String digraphCmd = "digraph\\s+(svg|pdf|png|dot)(.*)";
     private static final String serviceCmd = "service(.*)";
+    private static final String guiCmd = "gui";
 
     private static final String hello = "Welcome to grpc-visualizer. For help, type 'help'.";
     private static final String prompt = "grpc-vis: ";
 
     private static FileDescriptorSet fds;
+    private static File inputFile;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // user must specify gRPC config file
         if (args.length < 1) usgErrCrash();
 
+        inputFile = new File(args[0]);
         fds = introspectConfig(args[0]);
 
         // variable used in lambda expression should be final or effectively final
@@ -73,6 +79,8 @@ public final class GrpcVisualizer {
                         String regex = ".*" + cmd.replaceAll(serviceCmd, "$1").trim() + ".*";
                         if (!isValidRegex(regex)) System.err.println("Invalid regex: " + regex);
                         else printServices(regex);
+                    } else if (cmd.matches(guiCmd)) {
+                        DigraphServer.load();
                     } else if (!cmd.isEmpty()) {
                         if (isInteractive) {
                             System.err.println("Unrecognized command. Type 'help' for usage information.");
@@ -113,7 +121,7 @@ public final class GrpcVisualizer {
                 .filter(e -> e.getKey().matches(match))
                 .map(Map.Entry::getValue)
                 .forEach(m -> {
-                    MessageCLI.print(messages, m);
+                    MessageCLI.print(System.out, messages, m);
                     System.out.println();
                 });
     }
@@ -136,7 +144,7 @@ public final class GrpcVisualizer {
             System.err.println("Regex doesn't match any messages. Generating generic digraph.");
 
         try {
-            Digraph.render(messages, parent, format);
+            Digraph.render(messages, parent, format, false);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -154,7 +162,11 @@ public final class GrpcVisualizer {
                 });
     }
 
-    private static Map<String, DescriptorProto> allMessages() {
+    public static File getFile() {
+        return inputFile;
+    }
+
+    public static Map<String, DescriptorProto> allMessages() {
         Set<DescriptorProto> messages = fds
                 .getFileList()
                 .stream()
@@ -174,7 +186,7 @@ public final class GrpcVisualizer {
         }
 
         return messages.stream().collect(Collectors.toMap(
-                i -> simpleTypeName(i),
+                AnsiFieldDescriptor::simpleTypeName,
                 identity -> identity
         ));
     }

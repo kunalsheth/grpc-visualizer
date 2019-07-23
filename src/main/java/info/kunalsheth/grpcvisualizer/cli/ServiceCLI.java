@@ -21,6 +21,10 @@ public final class ServiceCLI {
     public static final Ansi.Color FG_CLIENT = Ansi.Color.GREEN;
     public static final Ansi.Color FG_SERVER = Ansi.Color.MAGENTA;
 
+    private ServiceCLI() {
+        throw new IllegalAccessError();
+    }
+
     public static void print(DescriptorProtos.ServiceDescriptorProto service) {
         System.out.println(ansi()
                 .a(INTENSITY_FAINT).a("service ").reset()
@@ -94,9 +98,5 @@ public final class ServiceCLI {
         });
 
         while (!clientLabel.isEmpty() || !serverLabel.isEmpty()) blankLn.run();
-    }
-
-    private ServiceCLI() {
-        throw new IllegalAccessError();
     }
 }

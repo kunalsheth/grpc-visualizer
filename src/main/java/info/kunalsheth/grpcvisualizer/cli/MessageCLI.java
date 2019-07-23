@@ -5,6 +5,7 @@ import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
 import info.kunalsheth.grpcvisualizer.prettyprint.AnsiFieldDescriptor;
 import org.fusesource.jansi.Ansi;
 
+import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,26 +18,23 @@ import static org.fusesource.jansi.Ansi.Attribute.INTENSITY_FAINT;
 
 public final class MessageCLI {
 
-    public static final Ansi.Color FG_CUSTOM_TYPE = Ansi.Color.CYAN;
-    public static final Ansi.Color FG_PRIMITIVE_TYPE = Ansi.Color.BLUE;
+    public static final Ansi.Color FG_TYPE = Ansi.Color.BLUE;
+    private static final String middleElement = faint("├─ ");
+    private static final String lastElement = faint("└─ ");
+    private static final String indentIncr = faint("   ");
+    private static final String lastIndentIncr = faint("│  ");
+    private static final String cyclic = ansi().bold().fgRed().a(" ↺").reset().toString();
 
     private static String faint(String txt) {
         return ansi().a(INTENSITY_FAINT).a(txt).reset().toString();
     }
 
-    private static final String middleElement = faint("├─ ");
-    private static final String lastElement = faint("└─ ");
-
-    private static final String indentIncr = faint("   ");
-    private static final String lastIndentIncr = faint("│  ");
-
-    private static final String cyclic = ansi().bold().fgRed().a(" ↺").reset().toString();
-
     public static void print(
+            PrintStream out,
             Map<String, DescriptorProto> messages,
             DescriptorProto msg
     ) {
-        System.out.println(
+        out.println(
                 messageLine(ansi(), msg)
         );
 
@@ -46,7 +44,7 @@ public final class MessageCLI {
         List<FieldDescriptorProto> children = msg.getFieldList();
 
         for (int i = 0; i < children.size(); i++)
-            print(
+            print(out,
                     messages, visited,
                     children.get(i), " ",
                     i == children.size() - 1
@@ -54,6 +52,7 @@ public final class MessageCLI {
     }
 
     private static void print(
+            PrintStream out,
             Map<String, DescriptorProto> messages,
             Set<DescriptorProto> visited,
             FieldDescriptorProto field,
@@ -63,7 +62,7 @@ public final class MessageCLI {
         boolean isPrimitive = messages.get(simpleTypeName(field)) == null;
         boolean wasVisited = !isPrimitive && visited.contains(type);
 
-        System.out.println(indent +
+        out.println(indent +
                 (last ? lastElement : middleElement) +
                 AnsiFieldDescriptor.fieldLine(ansi(),
                         field, isPrimitive
@@ -80,13 +79,13 @@ public final class MessageCLI {
 
                 List<FieldDescriptorProto> children = type.getFieldList();
                 for (int i = 0; i < children.size(); i++)
-                    print(
+                    print(out,
                             messages, visited,
                             children.get(i), indent,
                             i == children.size() - 1
                     );
-            } /*else System.out.println(indent + lastElement + ansi()
-                    .bold().fg(FG_PRIMITIVE_TYPE).a("...").reset().toString()
+            } /*else out.println(indent + lastElement + ansi()
+                    .bold().fg(FG_TYPE).a("...").reset().toString()
             );*/
         }
     }

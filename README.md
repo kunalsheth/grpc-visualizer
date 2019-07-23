@@ -4,6 +4,16 @@ CLI to visually inspect gRPC's `.proto` config files.
 ![Demo GIF](./demo/demo.gif)
 (`>>>` indicates a streaming RPC call, `──>` indicates a singular value.)
 
+```
+grpc-visualizer path/to/grpc-config.proto ["command 1" "command 2"...]
+
+commands: 
+	'help'
+	'message [REGEX]' — display structure of message data
+	'digraph (svg|pdf|png|dot) [REGEX]' — display structure of message types in relation to each other
+	'service [REGEX]' — display client/server RPC functions
+```
+
 ## Directional Graphs  
 Input:  
 ```proto

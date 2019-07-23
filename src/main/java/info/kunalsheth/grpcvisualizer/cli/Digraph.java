@@ -21,13 +21,13 @@ import static java.util.stream.Collectors.joining;
 
 public class Digraph {
 
-    public static void render(
-            Map<String, DescriptorProto> messages, DescriptorProto parent, String format
+    public static File render(
+            Map<String, DescriptorProto> messages, DescriptorProto parent, String format, boolean gui
     ) throws IOException, InterruptedException {
         LinkedList<String> dotSource = new LinkedList<>();
 
         if (parent == null) messages.forEach((containerName, containerNode) -> {
-            dotSource.add(printNode(containerName, containerNode));
+            dotSource.add(printNode(containerName, containerNode, gui));
 
             containerNode.getFieldList().stream()
                     .filter(f -> messages.containsKey(simpleTypeName(f)))
@@ -51,7 +51,7 @@ public class Digraph {
                     ))
                     .distinct()
                     .forEach(node -> dotSource.add(
-                            printNode(simpleTypeName(node), node)
+                            printNode(simpleTypeName(node), node, gui)
                     ));
 
 
@@ -83,7 +83,9 @@ public class Digraph {
         p.waitFor();
         if (p.exitValue() != 0) errCrash("dot -T" + format + " did not exit cleanly", 5);
 
-        System.out.println("Open " + output.getCanonicalPath() + " to view digraph.");
+        if (!gui) System.out.println("Open " + output.getCanonicalPath() + " to view digraph.");
+
+        return output;
     }
 
     private static String printEdge(String container, FieldDescriptorProto f, boolean isBackEdge) {
@@ -103,13 +105,15 @@ public class Digraph {
         return container + " -> " + simpleTypeName(f) + attrs;
     }
 
-    private static String printNode(String containerName, DescriptorProto containerNode) {
+    private static String printNode(String containerName, DescriptorProto containerNode, boolean gui) {
         return containerName + " [" +
                 "shape=box " +
                 "fontname=Helvetica " +
                 "fontcolor=cyan4 " +
                 "style=rounded " +
-                "tooltip=\"" + tooltip(containerNode) + "\" " +
+                (gui ?
+                        "URL=\"/" + containerName + "\" " :
+                        "tooltip=\"" + tooltip(containerNode) + "\" ") +
                 "]; ";
     }
 

@@ -6,8 +6,7 @@ import com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
 import org.fusesource.jansi.Ansi;
 
 import static com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED;
-import static info.kunalsheth.grpcvisualizer.cli.MessageCLI.FG_CUSTOM_TYPE;
-import static info.kunalsheth.grpcvisualizer.cli.MessageCLI.FG_PRIMITIVE_TYPE;
+import static info.kunalsheth.grpcvisualizer.cli.MessageCLI.FG_TYPE;
 import static org.fusesource.jansi.Ansi.Attribute.INTENSITY_FAINT;
 import static org.fusesource.jansi.Ansi.Attribute.ITALIC;
 
@@ -16,7 +15,7 @@ public final class AnsiFieldDescriptor {
     public static String messageLine(Ansi a, DescriptorProto m) {
         return a
                 .a(INTENSITY_FAINT).a("message ").reset()
-                .fg(FG_CUSTOM_TYPE).bold().a(m.getName()).reset()
+                .fgBright(FG_TYPE).bold().a(m.getName()).reset()
                 .toString();
     }
 
@@ -43,8 +42,8 @@ public final class AnsiFieldDescriptor {
     }
 
     public static String fieldLine(Ansi a, FieldDescriptorProto m, boolean isPrimitive) {
-        if (isPrimitive) a = a.fg(FG_PRIMITIVE_TYPE);
-        else a = a.fg(FG_CUSTOM_TYPE).bold();
+        if (isPrimitive) a = a.fg(FG_TYPE);
+        else a = a.fgBright(FG_TYPE).bold();
 
         return a
                 .a(simpleTypeName(m))
