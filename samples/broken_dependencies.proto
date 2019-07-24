@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+import "blah/blah/blah.proto";
+
+message RecursiveType {
+    MySpecialType should = 1;
+    bool not = 2;
+    My code = 4;
+}
+
+message My {
+    RecursiveType should = 1;
+    bool not = 2;
+    RecursiveType crash = 3;
+    My code = 4;
+    string again = 5;
+}
+
+message Person {
+    string name = 1;
+    int32 id = 2;  // Unique ID number for this person.
+    string email = 3;
+
+    enum PhoneType {
+        MOBILE = 0;
+        HOME = 1;
+        WORK = 2;
+    }
+
+    message PhoneNumber {
+        string number = 1;
+        PhoneType type = 2;
+    }
+
+    repeated PhoneNumber phones = 4;
+}
+
+// Our address book file is just one of these.
+message AddressBook {
+    repeated Person people = 1;
+}
+
+
+service MyFirstService {
+    // Sends a greeting
+    rpc GenerateBook (stream Person) returns (AddressBook) {}
+}
+
+service MySecondService {
+    // Sends a greeting
+    rpc GenerateBook (My) returns (stream RecursiveType) {}
+}

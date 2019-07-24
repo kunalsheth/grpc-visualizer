@@ -15,6 +15,7 @@ dependencies {
     implementation("com.google.protobuf", "protobuf-java", "3.8.0")
     implementation("org.fusesource.jansi", "jansi", "1.18")
     implementation("com.sparkjava", "spark-core", "2.8.0")
+    implementation("org.slf4j", "slf4j-nop", "1.7.21")
 }
 
 configure<JavaPluginConvention> {
