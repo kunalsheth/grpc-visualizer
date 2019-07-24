@@ -26,10 +26,10 @@ public final class GrpcVisualizer {
             "\n" +
             "commands: \n" +
             "\t'help'\n" +
-            "\t'gui'\n" +
             "\t'message [REGEX]' — display structure of message data\n" +
             "\t'digraph (svg|pdf|png|dot) [REGEX]' — display structure of message types in relation to each other\n" +
-            "\t'service [REGEX]' — display client/server RPC functions";
+            "\t'service [REGEX]' — display client/server RPC functions\n" +
+            "\t'gui' — open web server on port 8383 for interactive digraphs";
     private static final String messageCmd = "message(.*)";
     private static final String digraphCmd = "digraph\\s+(svg|pdf|png|dot)(.*)";
     private static final String serviceCmd = "service(.*)";
