@@ -7,6 +7,7 @@ import info.kunalsheth.grpcvisualizer.algo.ProtoGraph;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -27,22 +28,19 @@ public class Digraph {
         LinkedList<String> dotSource = new LinkedList<>();
 
         if (parent == null) messages.forEach((containerName, containerNode) -> {
-            dotSource.add(printNode(containerName, containerNode, gui));
+            dotSource.add(printNode(containerNode, gui));
 
             containerNode.getFieldList().stream()
                     .filter(f -> messages.containsKey(simpleTypeName(f)))
-                    .map(f -> printEdge(containerName, f, false))
+                    .map(f -> printEdge(containerNode, f, false))
                     .forEach(dotSource::add);
         });
         else {
             Set<ProtoGraph.EdgeData> edges = dfIter(messages, parent);
 
-            edges.forEach(e -> {
-                String containerName = simpleTypeName(e.from);
-                dotSource.add(
-                        printEdge(containerName, e.to, e.isBackEdge)
-                );
-            });
+            edges.forEach(e -> dotSource.add(
+                    printEdge(e.from, e.to, e.isBackEdge)
+            ));
 
             edges.stream()
                     .flatMap(e -> Stream.of(
@@ -51,10 +49,8 @@ public class Digraph {
                     ))
                     .distinct()
                     .forEach(node -> dotSource.add(
-                            printNode(simpleTypeName(node), node, gui)
+                            printNode(node, gui)
                     ));
-
-
         }
 
 
@@ -65,7 +61,10 @@ public class Digraph {
         pw.println("digraph {");
         pw.println("rankdir=\"LR\";");
         dotSource.stream()
+                .map(s -> s.split("\n"))
+                .flatMap(Arrays::stream)
                 .sorted()
+                .distinct()
                 .forEach(pw::println);
         pw.println("}");
         pw.close();
@@ -88,7 +87,7 @@ public class Digraph {
         return output;
     }
 
-    private static String printEdge(String container, FieldDescriptorProto f, boolean isBackEdge) {
+    private static String printEdge(DescriptorProto container, FieldDescriptorProto f, boolean isBackEdge) {
         boolean isRepeated = f.getLabel() == LABEL_REPEATED;
         String label = f.getName() + typeSuffix(f);
 
@@ -96,31 +95,67 @@ public class Digraph {
                 "fontsize=12 " +
                 "fontname=Courier " +
                 "fontcolor=gray25 " +
-                "label=\"" + label + "\" " +
                 "style=" + (isRepeated ? "dashed" : "solid") + " " +
-                "color=" + (isBackEdge ? "red" : "gray") + " " +
-                "constraint=" + !isBackEdge + " " +
-                " ];";
+                "color=" + (isBackEdge ? "red" : "gray") + " ";
 
-        return container + " -> " + simpleTypeName(f) + attrs;
+        String terminator = " ];";
+
+        if (f.hasOneofIndex()) return "" +
+
+                simpleTypeName(container) +
+                " -> " + virtualNodeName(container, f.getOneofIndex()) +
+                attrs +
+                "dir=none " +
+                "label=\"oneof " + container.getOneofDecl(f.getOneofIndex()).getName() + "\" " +
+                terminator +
+
+                '\n' +
+
+                virtualNodeName(container, f.getOneofIndex()) +
+                " -> " + simpleTypeName(f) +
+                attrs +
+                "label=\"" + label + "\" " +
+                "constraint=" + !isBackEdge +
+                terminator;
+
+        else return simpleTypeName(container) + " -> " + simpleTypeName(f) +
+                attrs +
+                "label=\"" + label + "\" " +
+                "constraint=" + !isBackEdge +
+                terminator;
     }
 
-    private static String printNode(String containerName, DescriptorProto containerNode, boolean gui) {
-        return containerName + " [" +
+    private static String printNode(DescriptorProto container, boolean gui) {
+        String virtualNodes = "";
+        for (int i = 0; i < container.getOneofDeclCount(); i++) {
+            // don't care about efficiency here. Clean code is better
+            //noinspection StringConcatenationInLoop
+            virtualNodes += virtualNodeName(container, i) + " [" +
+                    "shape=point " +
+                    "color=gray " +
+                    "height=0.01 " +
+                    "width=0.01 " +
+                    "];\n";
+        }
+
+        return virtualNodes + simpleTypeName(container) + " [" +
                 "shape=box " +
                 "fontname=Helvetica " +
                 "fontcolor=cyan4 " +
                 "style=rounded " +
-                (gui ?
-                        "URL=\"/" + containerName + "\" " :
-                        "tooltip=\"" + tooltip(containerNode) + "\" ") +
+                (gui ? "URL=\"/" + simpleTypeName(container) + "\" " : "") +
+                "tooltip=\"" + tooltip(container) + "\" " +
                 "]; ";
+    }
+
+    private static String virtualNodeName(DescriptorProto container, int idx) {
+        return simpleTypeName(container) + idx;
     }
 
     private static String tooltip(DescriptorProto containerNode) {
         return containerNode.getFieldList()
                 .stream()
                 .map(f -> simpleTypeName(f) + typeSuffix(f) + " " + f.getName())
-                .collect(joining("\n"));
+                .collect(joining("\\n"));
     }
 }

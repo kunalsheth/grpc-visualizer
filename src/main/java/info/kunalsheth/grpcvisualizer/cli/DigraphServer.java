@@ -38,19 +38,6 @@ public class DigraphServer {
                 return null;
             } else return generateHtml(node);
         });
-
-//        get("/svg/:node", (request, response) -> {
-//            DescriptorProto node = messages.get(request.params("node"));
-//            if (node == null) {
-//                notFound("Node '" + request.params("node") + "' not found");
-//                return null;
-//            } else synchronized (lock) {
-//                response.type("image/svg+xml");
-//                return readString(
-//                        render(messages, node, "svg", true).toPath()
-//                );
-//            }
-//        });
     }
 
     public static void load() {
@@ -72,8 +59,8 @@ public class DigraphServer {
                 "<html lang=\"en\">\n" +
                 "<head><title>grpc-visualizer | " + getFile().getName() + "</title></head>\n" +
                 "<body>\n" +
-                "<button style=\"display: inline; vertical-align: middle;\" onClick=\"history.back()\">Back</button>\n" +
-                "<div style=\"display: inline;\">\n" +
+                "<button onClick=\"history.back()\">Back</button>\n" +
+                "<div>\n" +
                 svg +
                 "</div>\n" +
                 "<hr>\n" +

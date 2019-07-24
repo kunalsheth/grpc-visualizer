@@ -105,11 +105,14 @@ public final class GrpcVisualizer {
 
         // generate `FileDescriptorSet` (think of this as reflection, but for Protobuf)
         File fdsFile = File.createTempFile("GrpcVisualizer", ".proto");
-        p = new ProcessBuilder("protoc", "-o", fdsFile.getAbsolutePath(), grpcConfigPath)
+        p = new ProcessBuilder("protoc",
+                /*"--include_source_info",*/ "--include_imports", "-o",
+                fdsFile.getAbsolutePath(), grpcConfigPath
+        )
                 .inheritIO()
                 .start();
         p.waitFor();
-        if (p.exitValue() != 0) errCrash("protoc -o did not exit cleanly", 3);
+        if (p.exitValue() != 0) errCrash("protoc --include_imports -o did not exit cleanly", 3);
 
         return FileDescriptorSet.parseFrom(new FileInputStream(fdsFile));
     }
