@@ -12,6 +12,7 @@ commands:
 	'message [REGEX]' — display structure of message data
 	'digraph (svg|pdf|png|dot) [REGEX]' — display structure of message types in relation to each other
 	'service [REGEX]' — display client/server RPC functions
+	'gui' — open web server on port 8383 for interactive digraphs
 ```
 
 ## Directional Graphs  
